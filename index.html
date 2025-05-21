@@ -2,57 +2,225 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>한국어 텍스트 음성 변환</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스타듀밸리 음성 변환기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        
+        @font-face {
+            font-family: 'PixelFont';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/DungGeunMo.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
         body {
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: 'PixelFont', 'Nanum Gothic', sans-serif;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 10px;
+            background-color: #7CAD63;
+            background-image: 
+                linear-gradient(45deg, #6B9B55 25%, transparent 25%),
+                linear-gradient(-45deg, #6B9B55 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #6B9B55 75%),
+                linear-gradient(-45deg, transparent 75%, #6B9B55 75%);
+            background-size: 20px 20px;
+            touch-action: manipulation;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        
         .container {
-            background-color: white;
+            background-color: #F4E2BC;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            border: 4px solid #8B5E3C;
+            box-shadow: 0 0 0 4px #E6C89D, 
+                       0 0 0 8px #8B5E3C,
+                       0 8px 16px rgba(0,0,0,0.2);
+            position: relative;
         }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 24px;
+            background-color: #E6B347;
+            border: 4px solid #8B5E3C;
+            border-radius: 12px;
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 1.8em;
+            margin: 0 0 20px 0;
+            text-align: center;
+            color: #4E2E1C;
+            text-shadow: 2px 2px 0 #E6B347;
+            letter-spacing: 1px;
+        }
+        
         textarea {
             width: 100%;
             height: 150px;
             margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 15px;
+            border: 4px solid #8B5E3C;
+            border-radius: 8px;
             resize: vertical;
+            font-size: 16px;
+            background-color: #FFF9E9;
+            color: #4E2E1C;
+            font-family: 'Nanum Gothic', sans-serif;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #E6B347;
+            box-shadow: 0 0 0 4px rgba(230, 179, 71, 0.3);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
         button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
+            flex: 1;
+            padding: 12px;
+            border: 4px solid #8B5E3C;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-family: 'PixelFont', sans-serif;
+            touch-action: manipulation;
+            transition: transform 0.1s, box-shadow 0.1s;
+            position: relative;
+            overflow: hidden;
         }
+        
+        #speakButton {
+            background-color: #E6B347;
+            color: #4E2E1C;
+            box-shadow: 0 4px 0 #8B5E3C;
+        }
+        
+        #stopButton {
+            background-color: #E67347;
+            color: #4E2E1C;
+            box-shadow: 0 4px 0 #8B5E3C;
+        }
+        
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #8B5E3C;
+        }
+        
         button:hover {
-            background-color: #45a049;
+            filter: brightness(1.1);
         }
+        
         button:disabled {
-            background-color: #cccccc;
+            background-color: #CCCCCC;
+            border-color: #8B8B8B;
+            box-shadow: 0 4px 0 #8B8B8B;
             cursor: not-allowed;
+            color: #666;
+        }
+        
+        .status-message {
+            text-align: center;
+            margin-top: 15px;
+            color: #4E2E1C;
+            font-size: 14px;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            border: 2px solid #8B5E3C;
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.4em;
+            }
+            
+            button {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            textarea {
+                padding: 10px;
+            }
+        }
+        
+        /* 스타듀밸리 스타일 장식 요소 */
+        .decoration {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #E6B347;
+            border: 3px solid #8B5E3C;
+            border-radius: 50%;
+        }
+        
+        .decoration.top-left {
+            top: -12px;
+            left: -12px;
+        }
+        
+        .decoration.top-right {
+            top: -12px;
+            right: -12px;
+        }
+        
+        .decoration.bottom-left {
+            bottom: -12px;
+            left: -12px;
+        }
+        
+        .decoration.bottom-right {
+            bottom: -12px;
+            right: -12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>한국어 텍스트 음성 변환</h1>
-        <textarea id="textToSpeak" placeholder="여기에 텍스트를 입력하세요..."></textarea>
-        <div>
-            <button onclick="speakText()" id="speakButton">음성으로 들려주기</button>
-            <button onclick="stopSpeaking()" id="stopButton">중지</button>
+        <div class="decoration top-left"></div>
+        <div class="decoration top-right"></div>
+        <div class="decoration bottom-left"></div>
+        <div class="decoration bottom-right"></div>
+        <h1>🌟 스타듀밸리 음성 변환기 🌟</h1>
+        <textarea id="textToSpeak" placeholder="펠리칸 마을에 전하고 싶은 이야기를 적어주세요..."></textarea>
+        <div class="button-container">
+            <button onclick="speakText()" id="speakButton">🔊 음성으로 들려주기</button>
+            <button onclick="stopSpeaking()" id="stopButton">⏹️ 중지하기</button>
         </div>
+        <div class="status-message" id="statusMessage"></div>
     </div>
 
     <script>
@@ -60,31 +228,49 @@
         const textArea = document.getElementById('textToSpeak');
         const speakButton = document.getElementById('speakButton');
         const stopButton = document.getElementById('stopButton');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // 모바일 브라우저 감지
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // 음성 합성 지원 확인
+        if (!synth) {
+            statusMessage.textContent = '죄송합니다. 이 브라우저는 음성 합성을 지원하지 않습니다.';
+            speakButton.disabled = true;
+            stopButton.disabled = true;
+        }
 
         function speakText() {
-            // 이전 음성이 재생 중이라면 중지
             if (synth.speaking) {
                 synth.cancel();
             }
 
-            const text = textArea.value;
+            const text = textArea.value.trim();
             if (text) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ko-KR';  // 한국어 설정
-                utterance.rate = 1.0;      // 음성 속도
-                utterance.pitch = 1.0;     // 음성 피치
+                utterance.lang = 'ko-KR';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
 
-                // 음성이 시작될 때
                 utterance.onstart = () => {
                     speakButton.disabled = true;
+                    statusMessage.textContent = '🎵 음성을 재생하는 중...';
                 };
 
-                // 음성이 끝날 때
                 utterance.onend = () => {
                     speakButton.disabled = false;
+                    statusMessage.textContent = '✨ 재생이 완료되었습니다!';
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('음성 합성 에러:', event);
+                    speakButton.disabled = false;
+                    statusMessage.textContent = '❌ 음성 재생 중 오류가 발생했습니다.';
                 };
 
                 synth.speak(utterance);
+            } else {
+                statusMessage.textContent = '📝 텍스트를 입력해주세요!';
             }
         }
 
@@ -92,8 +278,29 @@
             if (synth.speaking) {
                 synth.cancel();
                 speakButton.disabled = false;
+                statusMessage.textContent = '⏹️ 음성이 중지되었습니다.';
             }
         }
+
+        // 모바일에서 더블탭 확대 방지
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // 모바일에서 핀치 줌 방지
+        document.addEventListener('touchmove', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // 텍스트 입력 시 자동 높이 조절
+        textArea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
     </script>
 </body>
 </html>
